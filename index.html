@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vintage Royal Mechanical Teletype // Model 1954</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Outer Viewport Spotlight & Desk Surface with Main Background Video -->
+  <div class="viewport-wrapper">
+    <!-- Main Background Video -->
+    <video 
+      id="bg-video" 
+      class="bg-video" 
+      autoplay 
+      loop 
+      muted 
+      playsinline 
+      webkit-playsinline
+      preload="auto"
+      poster="public/assets/desk.png"
+    >
+      <source src="public/assets/bg-video.mp4" type="video/mp4; codecs=avc1">
+      <source src="assets/bg-video.mp4" type="video/mp4; codecs=avc1">
+      <source src="https://res.cloudinary.com/tqgsq6q7/video/upload/vc_h264,q_auto,w_1920/v1793989489/1106_1.mp4" type="video/mp4; codecs=avc1">
+      <source src="https://res.cloudinary.com/tqgsq6q7/video/upload/v1793989489/1106_1.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay-tint"></div>
+    <div class="desk-surface"></div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="app-container">
+
+      <!-- Ambient Autoplay / Engagement Banner -->
+      <div id="ambient-banner" class="ambient-banner">
+        <span class="pulse-pip"></span>
+        <span>Click or press any key to engage mechanical terminal</span>
+      </div>
+
+      <!-- Top Utility / HUD Bar -->
+      <div class="top-hud">
+        <div class="tele-serial">ROYAL VINTAGE BURGUNDY TELETYPE // SEC-SPEC #849-B</div>
+        <div class="hud-controls">
+          <button id="soundToggle" class="hud-btn" title="Toggle Synthesizer Sound">
+            <span class="hud-led"></span>
+            <span class="hud-text">SOUND: ON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden Input for Robust Physical Typing Focus -->
+      <input 
+        type="text" 
+        id="hidden-input" 
+        class="hidden-input" 
+        autocomplete="off" 
+        autocorrect="off" 
+        autocapitalize="off" 
+        spellcheck="false" 
+        aria-hidden="true" 
+      />
+
+      <!-- MAIN STAGE VIEWPORT -->
+      <div class="stage-viewport">
+
+        <!-- ==============================================================
+             PAPER STAGE WRAPPER (Z: 5) - Clamped behind platen roller
+             ============================================================== -->
+        <div id="paperStage" class="paper-stage">
+          <div id="typewriterPaper" class="typewriter-paper paper-resting">
+            <div id="paperContent"></div>
+            <!-- Platen roller clamping shadow at bottom of paper slot -->
+            <div class="paper-platen-clamp" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             LAYER 2 (Z: 10): VINTAGE WINE-RED ROYAL TYPEWRITER CHASSIS
+             (Anchored at bottom 30-35%; Paper lower edge feeds behind platen)
+             ============================================================== -->
+        <div class="typewriter-stage">
+          <div class="typewriter-img-box">
+            <!-- Photorealistic Vintage Royal Typewriter Image (Hollow Keyboard Well) -->
+            <img 
+              src="public/assets/typewriter-hollow.png" 
+              id="typewriter-chassis-img" 
+              class="typewriter-chassis-img" 
+              alt="Vintage Burgundy Royal Typewriter" 
+            />
+
+            <!-- Physical Carriage Return Lever Hotspot -->
+            <div id="carriage-lever" class="carriage-lever-hotspot" title="Carriage Return / Feed Lever (Enter)"></div>
+
+            <!-- 3D MECHANICAL KEYBED DECK OVER HOLLOW TRAY -->
+            <div id="keyboard-deck" class="keyboard-deck keyboard-hitbox-bed keybed-overlay" aria-label="Typewriter Keyboard">
+              <!-- Dynamically populated with 3D mechanical .keycap elements -->
+              <div class="spacebar-row flex justify-center items-center mt-2">
+                <button id="key-space" class="typewriter-spacebar" data-key=" ">
+                  <span class="spacebar-label">SPACE</span>
+                </button>
+              </div>
+            </div>
+
+          </div> <!-- End Typewriter Img Box -->
+        </div> <!-- End Typewriter Stage -->
+
+      </div> <!-- End Stage Viewport -->
+
+      <!-- ==============================================================
+           FULL-FRAME DESK SPREAD REVIEW (ALL 4 PAPERS TOGETHER)
+           ============================================================== -->
+      <div id="full-frame-review" class="full-frame-review">
+        <div class="review-spread-header">
+          <div class="review-title">SPECIFICATION AUDIT // REVIEW SUMMARY</div>
+          <div class="review-subtitle">REVIEW ALL 4 CATEGORY RECORDS &amp; DESCRIPTIONS // CLICK ANY CARD OR BUTTON TO REVISE</div>
+        </div>
+
+        <div class="review-papers-grid">
+          <!-- Sheet 1: Core Architecture -->
+          <div class="review-sheet sheet-1">
+            <div class="review-sheet-inner" id="review-sheet-1"></div>
+          </div>
+
+          <!-- Sheet 2: Timeline Velocity -->
+          <div class="review-sheet sheet-2">
+            <div class="review-sheet-inner" id="review-sheet-2"></div>
+          </div>
+
+          <!-- Sheet 3: Capital Allocation -->
+          <div class="review-sheet sheet-3">
+            <div class="review-sheet-inner" id="review-sheet-3"></div>
+          </div>
+
+          <!-- Sheet 4: Dispatch Ledger -->
+          <div class="review-sheet sheet-4">
+            <div class="review-sheet-inner" id="review-sheet-4"></div>
+            <div id="transmitted-stamp" class="transmitted-stamp-overlay">TRANSMITTED</div>
+          </div>
+        </div>
+
+        <div class="review-spread-actions">
+          <button id="review-back-btn" class="review-action-btn secondary">← BACK TO TYPEWRITER</button>
+          <button id="review-confirm-btn" class="review-action-btn primary">TRANSMIT SPECIFICATION TO TEAM ↵</button>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           FINAL STEP SUBMISSION: SUMMARY LEDGER MODAL
+           ============================================================== -->
+      <div id="summary-modal" class="summary-modal-backdrop">
+        <div class="summary-telegram">
+          <div class="telegram-stamp">VERIFIED &amp; ARCHIVED</div>
+
+          <div class="summary-telegram-header">
+            <div>
+              <div class="telegram-title">TELETYPE DISPATCH LEDGER</div>
+              <div id="ledger-timestamp" class="telegram-meta">DATE: 1954-10-14 // 14:32:08 UTC</div>
+              <div class="telegram-meta">CLASSIFICATION: CONFIDENTIAL RECORD // REF: 849-B</div>
+            </div>
+          </div>
+
+          <!-- Submitted Records -->
+          <div id="ledger-records" class="ledger-records"></div>
+
+          <!-- Actions -->
+          <div class="ledger-actions">
+            <button id="copy-summary-btn" class="ledger-btn">COPY SUMMARY</button>
+            <button id="new-trans-btn" class="ledger-btn primary">NEW TRANSMISSION</button>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- End App Container -->
+  </div> <!-- End Viewport Wrapper -->
+
+  <script src="assets/sound_data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

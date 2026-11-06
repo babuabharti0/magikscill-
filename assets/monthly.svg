@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <rect width="400" height="300" fill="#14161c" rx="8" />
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(212,175,75,0.12)" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb833" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#ffb833" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#grid)" />
+  <circle cx="200" cy="140" r="80" fill="url(#glow)" />
+  <circle cx="200" cy="140" r="65" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="6 4" />
+  <circle cx="200" cy="140" r="42" fill="none" stroke="#a82329" stroke-width="2" />
+  <polygon points="200,90 235,160 165,160" fill="none" stroke="#d4af37" stroke-width="1.5" />
+  <circle cx="200" cy="140" r="6" fill="#ffb833" />
+  <text x="200" y="240" font-family="Courier Prime, monospace" font-size="14" font-weight="bold" fill="#f5eedf" text-anchor="middle" letter-spacing="2">MONTHLY</text>
+  <text x="200" y="260" font-family="Courier Prime, monospace" font-size="10" fill="rgba(212,175,75,0.8)" text-anchor="middle" letter-spacing="1.5">3D SPEC MATRIX // MODEL 1954</text>
+</svg>

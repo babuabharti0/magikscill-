@@ -1,0 +1,2298 @@
+/* ==========================================================================
+   VINTAGE WINE-RED ROYAL MECHANICAL TELETYPE - 3D REALISTIC PAPER PHYSICS
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+
+:root {
+  --bg-darkroom: #090a0d;
+  --bg-desk: #12141a;
+  --paper-cream: #f6f1e7;
+  --paper-ink: #1c1a17;
+  --paper-faint: #787062;
+  --ribbon-red: #a82329;
+  --amber-glow: #ffb833;
+  --amber-dim: #7a5412;
+  --led-green: #39ff14;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #090a0d;
+  overflow: hidden;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main background viewport wrapper */
+.viewport-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #090a0d url("public/assets/desk.png") no-repeat center bottom / cover;
+  overflow: hidden;
+}
+
+/* Main background video & fallback desk image */
+.bg-desk,
+.bg-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  pointer-events: none;
+  z-index: 0;
+  filter: brightness(0.93) contrast(1.05) saturate(1.06);
+}
+
+/* Atmospheric warm study lamp vignette */
+.video-overlay-tint {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 32%, rgba(255, 235, 195, 0.06) 0%, rgba(16, 12, 8, 0.16) 50%, rgba(6, 5, 4, 0.62) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle warm lamp glow pooling on desk center */
+.desk-surface {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 26%, rgba(255, 215, 140, 0.09) 0%, rgba(210, 160, 90, 0.02) 48%, transparent 75%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* MAIN APP CONTAINER */
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-width: 1600px;
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ambient engagement banner */
+.ambient-banner {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: rgba(22, 17, 12, 0.92);
+  border: 1px solid rgba(212, 175, 75, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 184, 51, 0.2);
+  color: #ffc453;
+  font-size: 11px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  padding: 6px 22px;
+  border-radius: 20px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  will-change: opacity, transform;
+}
+
+.ambient-banner.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -14px);
+  pointer-events: none;
+}
+
+.pulse-pip {
+  width: 7px;
+  height: 7px;
+  background-color: var(--amber-glow);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--amber-glow);
+  animation: pip-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes pip-blink {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Top HUD bar */
+.top-hud {
+  position: absolute;
+  top: 12px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 55;
+  pointer-events: auto;
+}
+
+.tele-serial {
+  font-size: 10px;
+  letter-spacing: 2.2px;
+  color: rgba(220, 205, 175, 0.6);
+  font-family: 'Courier Prime', monospace;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.hud-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hud-btn {
+  background: rgba(26, 21, 16, 0.9);
+  border: 1px solid rgba(212, 175, 75, 0.35);
+  color: #dfd4bf;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  padding: 5px 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 235, 180, 0.12);
+}
+
+.hud-btn:hover {
+  background: rgba(38, 30, 22, 0.96);
+  border-color: rgba(255, 195, 75, 0.65);
+  color: #ffffff;
+}
+
+.hud-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--led-green);
+  box-shadow: 0 0 6px var(--led-green);
+}
+
+.hud-btn.muted .hud-led {
+  background-color: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+/* Hidden input to capture physical keyboard input cleanly */
+.hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  top: -100px;
+  left: -100px;
+}
+
+/* ==========================================================================
+   STAGE & 3D CYLINDRICAL PLATEN ARCHITECTURE
+   ========================================================================== */
+
+.stage-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: text;
+}
+
+/* 3D Parent perspective container for cylindrical curvature */
+.paper-layer-container,
+.paper-track {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+/* ==========================================================================
+   LAYER 1 (Z: 5): CYLINDRICALLY CURVED US LETTER (8.5 x 11) PAPER SHEET
+   ========================================================================== */
+.paper-sheet {
+  position: absolute;
+  /* Bottom edge firmly locked to platen clamp line (~34vh from bottom) */
+  bottom: clamp(260px, 34vh, 390px);
+  left: 50%;
+  /* Physical transform origin: locked to the bottom platen clamp */
+  transform-origin: bottom center;
+  /* Resting 3D cylindrical curve backward as paper leaves roller */
+  transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg) translateZ(0);
+  /* Locked US Letter 8.5" x 11" aspect ratio (1:1.294) */
+  aspect-ratio: 8.5 / 11;
+  width: clamp(440px, 34vw, 580px);
+  max-width: 580px;
+  height: auto;
+  max-height: calc(100vh - clamp(260px, 34vh, 390px) - 24px);
+  /* Warm vintage bond / cotton parchment harmonized with warm study lamp */
+  background: 
+    radial-gradient(ellipse at 50% 15%, #fdf9f1 0%, #f7f2e4 55%, #ece2cd 100%);
+  background-color: #f7f2e4;
+  color: #1e1b17;
+  border-radius: 4px 4px 2px 2px;
+  /* Real typewriter physical margins */
+  padding: 2.8rem 2.4rem 2.2rem 2.4rem;
+  /* Multi-layered physical cast drop shadow & corner vignette */
+  box-shadow: 
+    0 16px 45px rgba(0, 0, 0, 0.75),
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.25),
+    inset 0 0 45px rgba(185, 145, 80, 0.16),
+    inset 0 1px 2px rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(165, 135, 85, 0.28);
+  will-change: transform, opacity;
+  pointer-events: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+}
+
+/* Dynamic specular light sheen: top-to-bottom shading mimicking paper wrapping around a cylinder */
+.paper-sheet-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.01) 68%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 3;
+}
+
+/* Paper Texture & Grain: fine fiber overlay & authentic pica 1.5em ruling */
+.paper-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(rgba(140, 110, 70, 0.06) 1px, transparent 0),
+    linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    repeating-linear-gradient(to bottom, transparent, transparent calc(1.5em - 1px), rgba(160, 140, 110, 0.13) 1.5em);
+  background-size: 8px 8px, 100% 100%, 100% 1.5em;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Left vintage margin rule (red teletype ribbon guide) */
+.paper-sheet::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  width: 1px;
+  background: rgba(168, 35, 41, 0.25);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Platen Roller Feeder Cast Shadow: bottom 44px linear gradient */
+.paper-platen-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(20, 14, 9, 0.25) 45%, rgba(12, 8, 5, 0.65) 100%);
+  pointer-events: none;
+  border-radius: 0 0 2px 2px;
+  z-index: 6;
+}
+
+/* ==========================================================================
+   PHYSICS KEYFRAME ANIMATIONS (60-120 FPS ZERO-REFLOW HARDWARE ACCELERATED)
+   ========================================================================== */
+
+/* Mechanical Typebar Impact Jitter (Keystroke Physics: 30ms microscopic 1px vertical impact jitter) */
+@keyframes typebar-strike-a {
+  0% {
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg);
+  }
+  35% {
+    transform: translate3d(-50%, calc(var(--feed-offset, 0px) - 0.8px), 0.8px) rotateX(5.8deg);
+  }
+  100% {
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg);
+  }
+}
+
+@keyframes typebar-strike-b {
+  0% {
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg);
+  }
+  35% {
+    transform: translate3d(-50%, calc(var(--feed-offset, 0px) - 0.8px), 0.8px) rotateX(5.8deg);
+  }
+  100% {
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg);
+  }
+}
+
+.paper-sheet.strike-a {
+  animation: typebar-strike-a 30ms cubic-bezier(0.1, 0.9, 0.3, 1);
+}
+
+.paper-sheet.strike-b {
+  animation: typebar-strike-b 30ms cubic-bezier(0.1, 0.9, 0.3, 1);
+}
+
+/* Platen Advance / Line Feed Ratchet Pawl Click (Snappy increment with rebound) */
+@keyframes ratchet-pawl-click {
+  0% {
+    transform: translate3d(-50%, var(--prev-feed-offset, 0px), 0) rotateX(6deg);
+  }
+  68% {
+    /* Snappy mechanical feed stroke with slight pawl overshoot */
+    transform: translate3d(-50%, calc(var(--feed-offset, 0px) - 3px), 0.6px) rotateX(6.3deg);
+  }
+  84% {
+    /* Elastic pawl rebound */
+    transform: translate3d(-50%, calc(var(--feed-offset, 0px) + 0.8px), -0.2px) rotateX(5.9deg);
+  }
+  100% {
+    /* Firm latch into ratchet wheel teeth */
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg);
+  }
+}
+
+.paper-sheet.ratchet-advance {
+  animation: ratchet-pawl-click 160ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* Paper Eject & Swap Dynamics */
+/* Phase 1: Rapid upward acceleration out of platen with 3D lift */
+@keyframes paper-eject-fly-out {
+  0% {
+    transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg) rotate(0deg) rotateY(0deg);
+    opacity: 1;
+  }
+  22% {
+    transform: translate3d(-50%, calc(var(--feed-offset, 0px) + 6px), 2px) rotateX(7deg) rotate(-0.5deg) rotateY(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-50%, -140%, 40px) rotate(-4deg) rotateY(8deg) rotateX(12deg);
+    opacity: 0;
+  }
+}
+
+/* Phase 2: Fresh sheet loads from underneath with elastic roll-in and top-edge flutter */
+@keyframes paper-roll-in-flutter {
+  0% {
+    transform: translate3d(-50%, 65%, -20px) rotateX(18deg) scale(0.95);
+    opacity: 0;
+  }
+  65% {
+    transform: translate3d(-50%, -6px, 4px) rotateX(4.5deg) scale(1.005) rotate(0.6deg);
+    opacity: 1;
+  }
+  84% {
+    transform: translate3d(-50%, 2px, -1px) rotateX(6.8deg) scale(0.998) rotate(-0.2deg);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0) rotateX(6deg) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.paper-sheet.ejecting {
+  animation: paper-eject-fly-out 480ms cubic-bezier(0.35, 0, 0.2, 1) forwards !important;
+}
+
+.paper-sheet.loading-roll {
+  animation: paper-roll-in-flutter 550ms cubic-bezier(0.16, 1.2, 0.3, 1) forwards !important;
+}
+
+/* Jam shake */
+.paper-sheet.shake {
+  animation: paper-jam-shake 0.32s ease-in-out;
+}
+
+@keyframes paper-jam-shake {
+  0%, 100% { transform: translate3d(-50%, var(--feed-offset, 0px), 0) rotateX(6deg); }
+  20%, 60% { transform: translate3d(calc(-50% - 6px), var(--feed-offset, 0px), 0) rotateX(6deg) rotate(-0.5deg); }
+  40%, 80% { transform: translate3d(calc(-50% + 6px), var(--feed-offset, 0px), 0) rotateX(6deg) rotate(0.5deg); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+/* ==========================================================================
+   PAPER STAGE & PLATEN ROLLER CLAMPING
+   Layered behind typewriter foreground (z-index: 5 vs typewriter z-index: 10)
+   ========================================================================== */
+.paper-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#typewriterPaper {
+  position: absolute;
+  left: 38.6%;
+  top: 6.2%;
+  width: 22.8%;
+  height: 57%;
+  background: #FAF7EE;
+  box-shadow: inset 0 0 25px rgba(180, 160, 120, 0.16), 0 8px 24px rgba(0, 0, 0, 0.42);
+  border-radius: 1px;
+  padding: 16px 18px 28px 18px;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  color: #0F172A;
+  z-index: 5;
+  overflow: hidden;
+  will-change: transform;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Authentic Paper Grain & Monospace Pica Rule */
+#typewriterPaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(140, 110, 70, 0.05) 1px, transparent 0),
+    repeating-linear-gradient(to bottom, transparent, transparent calc(1.5em - 1px), rgba(160, 140, 110, 0.12) 1.5em);
+  background-size: 8px 8px, 100% 1.5em;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Margin guideline */
+#typewriterPaper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 1px;
+  background: rgba(168, 35, 41, 0.18);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Platen Roller Clamping Shadow (Tucked behind machine roller bar) */
+.paper-platen-clamp {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(20, 14, 9, 0.22) 50%, rgba(10, 8, 5, 0.7) 100%);
+  pointer-events: none;
+  z-index: 8;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+}
+
+/* Ink-bleed stamp & typography styling */
+.typewriter-ink {
+  text-shadow: 0.3px 0.3px 0.5px rgba(17, 24, 39, 0.65), -0.2px 0 0.4px rgba(17, 24, 39, 0.4);
+  letter-spacing: -0.02em;
+}
+
+/* Kinetic Mechanical Roll Keyframes */
+.paper-ejecting {
+  transform: translateY(-120%) rotate(-1deg) !important;
+  opacity: 0 !important;
+  transition: transform 0.52s cubic-bezier(0.45, 0, 0.2, 1), opacity 0.35s ease !important;
+}
+.paper-loading-in {
+  transform: translateY(-110%) rotate(0.8deg) !important;
+  opacity: 0 !important;
+  transition: none !important;
+}
+.paper-resting {
+  opacity: 1 !important;
+  transition: transform 0.58s cubic-bezier(0.18, 1, 0.32, 1), opacity 0.2s ease !important;
+}
+
+#typewriterPaper.shake {
+  animation: shake 0.32s ease-in-out;
+}
+
+#paperContent {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 4px 6px;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  color: #0F172A;
+}
+
+.sheet-meta-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.65;
+  border-bottom: 1px dashed rgba(15, 23, 42, 0.35);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.sheet-directive {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+/* ---------- Options List & Streamlined Single-Line Rows ---------- */
+.paper-opt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.option-box {
+  display: inline-block;
+  width: 26px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 5px;
+  margin-bottom: 3px;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: normal;
+  user-select: none;
+  transition: background 0.12s ease;
+  color: #0F172A;
+}
+
+.opt-head {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 3px;
+}
+
+.opt-brief {
+  font-size: 7.8px;
+  line-height: 1.25;
+  color: #64748B;
+  font-weight: normal;
+  margin-left: 24px;
+  margin-top: 1px;
+}
+
+.option-row.selected .opt-brief {
+  color: #78350F;
+  font-weight: 600;
+}
+
+.option-row:hover {
+  background: rgba(254, 240, 138, 0.3);
+}
+
+.option-row.focused {
+  background: rgba(254, 240, 138, 0.4);
+}
+
+.option-row.selected {
+  background: #FEF08A;
+  color: #000;
+  font-weight: 700;
+}
+
+.opt-num {
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  color: #78350f;
+  margin-right: 4px;
+}
+
+.opt-dots {
+  color: rgba(15, 23, 42, 0.35);
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  padding: 0 4px;
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+}
+
+.opt-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.sheet-footer-bar {
+  border-top: 1px dashed rgba(15, 23, 42, 0.25);
+  padding-top: 6px;
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.5px;
+  font-weight: 600;
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Step 4 Sign-Off Form & Underlined Lines ---------- */
+.paper-form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.field-lbl {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #0F172A;
+  white-space: nowrap;
+}
+
+.paper-textarea {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.6);
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #0F172A;
+  outline: none;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: border-bottom-color 0.15s ease, background 0.15s ease;
+  box-sizing: border-box;
+  padding: 2px 4px;
+}
+
+.paper-textarea:focus {
+  border-bottom-color: #b45309;
+  background: rgba(254, 243, 199, 0.3);
+}
+
+.ledger-line {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.65);
+  font-family: inherit;
+  font-size: 10.5px;
+  color: #0F172A;
+  padding: 2px 4px;
+  margin-bottom: 6px;
+  width: 100%;
+  outline: none;
+  transition: border-bottom-color 0.15s ease, background 0.15s ease;
+}
+
+.ledger-line:focus {
+  border-bottom-color: #b45309;
+  background: rgba(254, 243, 199, 0.3);
+}
+
+.ledger-line.field-error {
+  border-bottom-color: #DC2626;
+  background: rgba(254, 202, 202, 0.3);
+}
+
+/* Backward compatibility aliases */
+.paper-line {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.65);
+  font-family: inherit;
+  font-size: 10.5px;
+  color: #0F172A;
+  padding: 2px 4px;
+  outline: none;
+}
+
+/* ---------- Dispatch action button ---------- */
+.dispatch-action-btn {
+  width: 100%;
+  background: #0F172A;
+  color: #FAF7EE;
+  font-family: 'Courier Prime', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6.5px 0;
+  margin-top: 6px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.dispatch-action-btn:hover {
+  background: #1E293B;
+}
+.dispatch-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   AUTHENTIC INK TYPOGRAPHY & PICA SPACING
+   ========================================================================== */
+.paper-header {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1.5px solid rgba(40, 35, 30, 0.22);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.paper-brand {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--paper-faint);
+  text-transform: uppercase;
+}
+
+.paper-step-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--ribbon-red);
+}
+
+.paper-prompt-title {
+  position: relative;
+  z-index: 4;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #141210;
+  margin-bottom: 4px;
+}
+
+.paper-prompt-desc {
+  position: relative;
+  z-index: 4;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: #4e483f;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+/* Live typewriter text output area with 1.5em line-height & pica tracking */
+.paper-typing-area {
+  position: relative;
+  z-index: 4;
+  flex: 1;
+  font-size: 14.5px;
+  line-height: 1.5em;
+  letter-spacing: 0.05em;
+  word-break: break-word;
+  white-space: pre-wrap;
+  color: var(--paper-ink);
+  opacity: 0.94;
+  text-shadow: 0 0 1px rgba(28, 26, 23, 0.4);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.typed-char {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Vintage block cursor */
+.paper-cursor {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--paper-ink);
+  opacity: 1;
+  animation: cursor-blink 0.9s steps(1, start) infinite;
+  margin-left: 2px;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.paper-footer-prompt {
+  position: relative;
+  z-index: 5;
+  margin-top: auto;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #6e675b;
+  border-top: 1px dashed rgba(60, 50, 40, 0.25);
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Paper Footer Actions */
+.paper-footer-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ==========================================================================
+   DYNAMIC WIZARD OPTIONS & STEP 4 BRIEF STYLING
+   ========================================================================== */
+.paper-options-container {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.option-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 3px;
+  border: 1px dashed rgba(120, 100, 75, 0.25);
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.option-item:hover {
+  background: rgba(254, 249, 235, 0.85);
+  border-color: rgba(180, 140, 60, 0.5);
+}
+
+/* Vintage Yellow Highlighter Class: active selection */
+.option-item.bg-amber-100\/90,
+.option-item.active-selection {
+  background: rgba(254, 243, 199, 0.92) !important;
+  border: 1px solid rgba(217, 119, 6, 0.4) !important;
+  border-left: 3.5px solid #b45309 !important;
+  box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.option-check {
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  font-size: 11.5px;
+  color: #78350f;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.option-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.option-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1714;
+  letter-spacing: 0.5px;
+}
+
+.option-tag {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(168, 35, 41, 0.12);
+  color: #a82329;
+  padding: 1px 6px;
+  border-radius: 2px;
+  border: 1px solid rgba(168, 35, 41, 0.25);
+  white-space: nowrap;
+}
+
+.option-subtitle {
+  font-size: 9px;
+  line-height: 1.35;
+  color: #5c5549;
+}
+
+/* Step 4 Brief Container */
+.paper-brief-container {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.brief-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #4a4237;
+  text-transform: uppercase;
+}
+
+.brief-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px dashed rgba(120, 100, 75, 0.4);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #1a1714;
+  resize: none;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.brief-textarea:focus {
+  background: rgba(254, 243, 199, 0.95);
+  border-color: #b45309;
+  box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   LEFT SPEC & RIGHT DOSSIER SHEETS (CORKBOARD / DESK PANELS)
+   ========================================================================== */
+.dossier-sheet {
+  position: absolute;
+  bottom: clamp(260px, 34vh, 390px);
+  max-height: calc(100vh - clamp(260px, 34vh, 390px) - 24px);
+  background: 
+    radial-gradient(ellipse at 50% 15%, #fdf9f1 0%, #f7f2e4 55%, #ece2cd 100%);
+  border: 1px solid rgba(165, 135, 85, 0.32);
+  border-radius: 4px;
+  padding: 18px 20px;
+  color: #1e1b17;
+  box-shadow: 
+    0 16px 45px rgba(0, 0, 0, 0.75),
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    inset 0 0 45px rgba(185, 145, 80, 0.16);
+  z-index: 15;
+  pointer-events: auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dossier-pin {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 35% 35%, #ffd770 0%, #b8860b 60%, #5c4308 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+.dossier-tag-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid rgba(40, 35, 30, 0.22);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.dossier-tag {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #787062;
+  text-transform: uppercase;
+}
+
+.dossier-mono-stamp {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #a82329;
+  font-family: 'Courier Prime', monospace;
+}
+
+/* Left Spec Panel */
+.left-spec-panel {
+  left: max(20px, 2.5vw);
+  width: clamp(260px, 20vw, 320px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+
+.left-spec-panel.swapping {
+  transform: translate3d(-18px, 0, 0);
+  opacity: 0.2;
+}
+
+.spec-asset-wrapper {
+  width: 100%;
+  height: 140px;
+  background: #14161c;
+  border: 1px solid rgba(212, 175, 75, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.spec-asset-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.spec-asset-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #141210;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.spec-asset-desc {
+  font-size: 9.5px;
+  line-height: 1.4;
+  color: #5c5549;
+  font-style: italic;
+}
+
+/* Right Dossier Panel */
+.right-dossier-panel {
+  right: max(20px, 2.5vw);
+  width: clamp(290px, 22.5vw, 360px);
+}
+
+.dossier-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dossier-section-title {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #787062;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.dossier-cap-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #141210;
+}
+
+.dossier-sla-badge {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(168, 35, 41, 0.12);
+  color: #a82329;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid rgba(168, 35, 41, 0.3);
+  white-space: nowrap;
+}
+
+.dossier-deliverables-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dossier-deliverables-list li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: #38342e;
+}
+
+.dossier-deliverables-list li::before {
+  content: "•";
+  position: absolute;
+  left: 2px;
+  color: #a82329;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.dossier-metrics-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dashed rgba(120, 100, 75, 0.35);
+  border-radius: 3px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+}
+
+.dossier-metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9.5px;
+}
+
+.dossier-metric-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #5c5549;
+}
+
+.dossier-metric-val {
+  font-weight: 700;
+  color: #1a1714;
+  font-family: 'Courier Prime', monospace;
+}
+
+/* Client Sign-off Section */
+.client-signoff-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px dashed rgba(60, 50, 40, 0.25);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+.dossier-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dossier-field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(120, 100, 75, 0.35);
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 10.5px;
+  color: #1a1714;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.dossier-field:focus {
+  background: rgba(254, 243, 199, 0.95);
+  border-color: #b45309;
+  box-shadow: inset 0 0 6px rgba(245, 158, 11, 0.2);
+}
+
+.dossier-field.field-error {
+  border-color: #dc2626 !important;
+  background: #fef2f2 !important;
+  animation: shake 0.3s ease-in-out;
+}
+
+.dispatch-submit-btn {
+  background: #9b282d;
+  border: 1px solid #cf4249;
+  color: #ffffff;
+  font-family: 'Courier Prime', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(155, 40, 45, 0.45);
+  margin-top: 4px;
+}
+
+.dispatch-submit-btn:hover {
+  background: #b52f35;
+  box-shadow: 0 6px 16px rgba(181, 47, 53, 0.6);
+  transform: translateY(-1px);
+}
+
+.dispatch-submit-btn:active {
+  transform: translateY(1px);
+}
+
+.dispatch-submit-btn.is-loading {
+  background: #4b1619;
+  border-color: #7f1d1d;
+  cursor: wait;
+}
+
+.dispatch-pulse-led {
+  width: 6px;
+  height: 6px;
+  background: #ffb833;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffb833;
+}
+
+/* Responsive adjustment for side panels */
+@media (max-width: 1280px) {
+  .left-spec-panel {
+    display: none;
+  }
+  .right-dossier-panel {
+    width: clamp(260px, 26vw, 310px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .right-dossier-panel {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   LAYER 2 (Z: 10): VINTAGE WINE-RED ROYAL TYPEWRITER CHASSIS
+   ========================================================================== */
+.typewriter-stage {
+  position: absolute;
+  bottom: 0.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(888px, 69.6vw, 1224px);
+  max-width: 96vw;
+  height: auto;
+  aspect-ratio: 1672 / 941;
+  max-height: 65vh;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Grounded Table Contact Shadow (Ambient occlusion directly onto the desk table) */
+.typewriter-stage::after {
+  content: "";
+  position: absolute;
+  bottom: -1%;
+  left: 5%;
+  width: 90%;
+  height: 20%;
+  background: radial-gradient(ellipse at 50% 85%, rgba(0, 0, 0, 0.98) 0%, rgba(16, 11, 7, 0.8) 38%, rgba(8, 5, 3, 0.42) 65%, transparent 80%);
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.typewriter-img-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1672 / 941;
+  pointer-events: none;
+}
+
+.typewriter-chassis-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  /* Realistic physical contact and desk cast shadows + warm tungsten study lamp color grading */
+  filter: 
+    drop-shadow(0 12px 14px rgba(8, 5, 3, 0.96)) 
+    drop-shadow(0 26px 30px rgba(12, 8, 5, 0.88))
+    drop-shadow(0 52px 64px rgba(5, 3, 2, 0.76))
+    brightness(0.97) contrast(1.05) saturate(1.06) sepia(0.04);
+}
+
+/* Physical carriage return lever hotspot */
+.carriage-lever-hotspot {
+  position: absolute;
+  top: 8%;
+  left: 1.5%;
+  width: 10%;
+  height: 25%;
+  z-index: 28;
+  cursor: pointer;
+  border-radius: 8px;
+  pointer-events: auto;
+  transition: transform 0.15s ease;
+}
+
+.carriage-lever-hotspot:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 184, 51, 0.45));
+}
+
+.carriage-lever-hotspot:active {
+  transform: rotate(-6deg) translateY(2px);
+}
+
+/* ==========================================================================
+   3D MECHANICAL KEYBED & VINTAGE ROYAL KEYCAPS (HOLLOW TRAY)
+   ========================================================================== */
+.keyboard-deck,
+.keyboard-hitbox-bed,
+.keybed-overlay {
+  position: absolute;
+  left: 50%;
+  transform-origin: 50% 85%;
+  perspective: 700px;
+  perspective-origin: 50% 20%;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -20px) rotateX(18deg);
+  width: 49.5%;
+  bottom: 8.5%;
+  height: 25.5%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0 auto;
+}
+
+.key-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: clamp(1.8px, 0.3vw, 3px);
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  transform-style: preserve-3d;
+}
+
+.key-row.space-row,
+.key-row.row-5 {
+  justify-content: center;
+  margin-top: clamp(1px, 0.25vw, 3px);
+  transform-style: preserve-3d;
+}
+
+/* Base .keycap: Authentic 1950s Royal Nickel-Rim & Ivory Enamel Keycap */
+.keycap,
+.type-key,
+.key-cap,
+.typewriter-key {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(20px, 2.36vw, 26.5px);
+  height: clamp(19px, 2.24vw, 25px);
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Polished nickel / chrome retaining bezel rim */
+  border: 1.5px solid #8e8b86;
+
+  /* Aged ivory concave enamel face with subtle glass lens sheen */
+  background: 
+    radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.25) 36%, transparent 60%),
+    radial-gradient(circle at 48% 42%, #ffffff 0%, #f6f1e6 30%, #ded5c2 70%, #c4b69d 100%);
+
+  /* 3D collar rim, bottom bevel shadow, and contact shadow into typewriter comb */
+  box-shadow: 
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(65, 60, 52, 0.35),
+    0 1.5px 0 #8e8b86,
+    0 3px 0 #3e3a35,
+    0 4.5px 0 #1c1917,
+    0 6px 8px rgba(0, 0, 0, 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+
+  /* Monospace typography matching stamped typewriter slugs */
+  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-weight: 700;
+  font-size: clamp(8.5px, 1vw, 11px);
+  color: #1a1714;
+  line-height: 1;
+  text-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.6);
+
+  /* Fast mechanical spring action */
+  transition: transform 0.035s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.035s cubic-bezier(0.2, 0, 0, 1), filter 0.035s ease-out;
+  transform: rotateX(15deg);
+  will-change: transform, box-shadow, filter;
+}
+
+/* Mechanical key-lever stem connecting the keycap to the comb slots below */
+.keycap::before {
+  content: '';
+  position: absolute;
+  bottom: -5.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3.5px;
+  height: 7px;
+  background: linear-gradient(180deg, #9ca3af 0%, #4b5563 50%, #1f2937 100%);
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.keycap:hover,
+.type-key:hover,
+.key-cap:hover,
+.typewriter-key:hover {
+  filter: brightness(1.04);
+}
+
+/* Key label layout: Single, Dual (Numbers/Symbols), and Modifiers */
+.key-single {
+  display: inline-block;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.key-dual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.key-sub,
+.shift-char {
+  font-size: clamp(6px, 0.7vw, 7.8px);
+  color: #383430;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.5px;
+}
+
+.key-main,
+.main-char {
+  font-size: clamp(8px, 0.9vw, 10.5px);
+  color: #1a1714;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.key-modifier {
+  font-size: clamp(7px, 0.8vw, 9px);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Mechanical Plunge Physics: Active Pressed State */
+.keycap.is-pressed,
+.keycap.plunged,
+.keycap.depressed,
+.type-key.is-pressed,
+.type-key.plunged,
+.type-key.depressed,
+.typewriter-key.is-pressed,
+.typewriter-key.plunged,
+.typewriter-key.depressed {
+  transform: rotateX(15deg) translateY(2.2px) scale(0.96) !important;
+  filter: brightness(0.88) !important;
+  box-shadow: 
+    inset 0 2px 3px rgba(0, 0, 0, 0.75), 
+    0 0.8px 0 #141311, 
+    0 2px 3px rgba(0, 0, 0, 0.85) !important;
+}
+
+.keycap.is-pressed::before,
+.keycap.plunged::before {
+  height: 2px !important;
+  bottom: -2px !important;
+}
+
+/* Modifier oval keys: Tab, Backspace, Lock, Return */
+.keycap.key-utility-oval,
+.type-key.key-utility-oval,
+.typewriter-key.key-utility-oval {
+  aspect-ratio: auto;
+  width: clamp(26px, 3.1vw, 34px);
+  height: clamp(19px, 2.24vw, 25px);
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-size: clamp(7px, 0.8vw, 9px);
+  letter-spacing: 0.5px;
+}
+
+/* Row 4 Shift Keys: Balanced on left and right */
+.keycap.key-utility-shift,
+.type-key.key-utility-shift,
+.typewriter-key.key-utility-shift {
+  aspect-ratio: auto;
+  width: clamp(30px, 3.5vw, 38px);
+  height: clamp(19px, 2.24vw, 25px);
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-size: clamp(7px, 0.8vw, 9px);
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   AUTHENTIC ELONGATED MECHANICAL SPACEBAR
+   ========================================================================== */
+.spacebar-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3px;
+  transform-style: preserve-3d;
+}
+
+.typewriter-spacebar {
+  width: 46%;
+  height: 22px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #EDE9DE 65%, #D6CEBE 100%);
+  border: 1.5px solid #A8A29E;
+  border-radius: 12px;
+  box-shadow: 
+    0 3px 0 #78716C,
+    0 5px 0 #292524,
+    0 7px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: rotateX(16deg);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+  user-select: none;
+  outline: none;
+}
+
+.typewriter-spacebar:active,
+.typewriter-spacebar.pressed,
+.typewriter-spacebar.is-pressed,
+.typewriter-spacebar.plunged,
+.keycap.key-spacebar.is-pressed,
+.keycap.key-spacebar.plunged,
+.keycap.space-bar.is-pressed {
+  transform: rotateX(16deg) translateY(2.5px) !important;
+  box-shadow: 
+    0 1px 0 #78716C,
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.spacebar-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #44403C;
+  opacity: 0.7;
+}
+
+/* Spacebar: Centered antique ivory bar nestled squarely in the lower mechanical shelf */
+.keycap.key-spacebar,
+.type-key.key-spacebar,
+.typewriter-key.key-spacebar,
+.keycap.space-bar,
+.typewriter-key.space-bar {
+  aspect-ratio: auto;
+  width: 46%;
+  height: 22px;
+  border-radius: 12px;
+  margin: 0 auto;
+  border: 1.5px solid #A8A29E;
+  background: linear-gradient(180deg, #FFFFFF 0%, #EDE9DE 65%, #D6CEBE 100%);
+  box-shadow: 
+    0 4px 0 #78716C,
+    0 6px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Mechanical latched lock state (NO yellow/amber glows or halos) */
+.keycap.active-lock,
+.type-key.active-lock,
+.typewriter-key.active-lock {
+  transform: translateY(2px) scale(0.98) !important;
+  border-color: #63605c !important;
+  box-shadow: 
+    inset 0 2px 3px rgba(0, 0, 0, 0.65), 
+    0 1px 0 #141311, 
+    0 2px 3px rgba(0, 0, 0, 0.7) !important;
+  filter: brightness(0.92) !important;
+  color: #1a1714 !important;
+}
+
+/* ==========================================================================
+   TRANSMISSION COMPLETE / SUMMARY LEDGER MODAL (STEP 3 FINISH)
+   ========================================================================== */
+.summary-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 5, 8, 0.84);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.summary-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.summary-telegram {
+  position: relative;
+  width: min(640px, 90vw);
+  max-height: 84%;
+  background: #fdfaf3;
+  color: #1a1714;
+  border-radius: 4px;
+  padding: 34px 44px;
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.85),
+    inset 0 0 60px rgba(180, 160, 120, 0.18);
+  overflow-y: auto;
+  transform: translate3d(0, 20px, 0) scale(0.96);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.summary-modal-backdrop.active .summary-telegram {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.summary-telegram-header {
+  border-bottom: 2px solid #1a1714;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.telegram-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.telegram-meta {
+  font-size: 10px;
+  color: #696256;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+/* Authentic Rubber Stamp Effect */
+.telegram-stamp {
+  position: absolute;
+  top: 30px;
+  right: 44px;
+  border: 3px double var(--ribbon-red);
+  color: var(--ribbon-red);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+}
+
+.ledger-records {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.ledger-item {
+  border-left: 3px solid #1a1714;
+  padding-left: 14px;
+}
+
+.ledger-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #73695c;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.ledger-value {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #12100d;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ledger-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  border-top: 1px dashed rgba(60, 50, 40, 0.3);
+  padding-top: 18px;
+}
+
+.ledger-btn {
+  background: #1e222b;
+  border: 1px solid #3d4554;
+  color: #f0f3f8;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ledger-btn:hover {
+  background: #2e3544;
+  border-color: #606d85;
+}
+
+.ledger-btn.primary {
+  background: #9b282d;
+  border-color: #cf4249;
+  color: #ffffff;
+}
+
+.ledger-btn.primary:hover {
+  background: #b52f35;
+}
+
+/* Responsive tweaks */
+@media (max-height: 720px) {
+  .paper-sheet {
+    bottom: clamp(230px, 31vh, 340px);
+    padding: 1.8rem 1.6rem 1.6rem 1.6rem;
+  }
+  .paper-typing-area {
+    font-size: 13px;
+    line-height: 1.45em;
+  }
+  .typewriter-stage {
+    max-height: 58vh;
+  }
+}
+
+
+/* Utility focus ring states */
+.ring-2 {
+  outline: 2px solid #F59E0B !important;
+  outline-offset: 1px !important;
+}
+.ring-amber-400 {
+  outline-color: #FBBF24 !important;
+}
+
+/* ==========================================================================
+   FULL-FRAME DESK SPREAD REVIEW (ALL 4 PAPERS TOGETHER)
+   ========================================================================== */
+.full-frame-review {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: radial-gradient(circle at 50% 30%, rgba(30, 24, 18, 0.94) 0%, rgba(12, 10, 8, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(12px, 2vh, 22px) clamp(16px, 3vw, 32px);
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.full-frame-review.active ~ #ambient-banner,
+.full-frame-review.active + #ambient-banner {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+.full-frame-review.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.review-spread-header {
+  text-align: center;
+  margin-bottom: clamp(6px, 1.2vh, 14px);
+}
+
+.review-title {
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(14px, 1.6vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #EDE8DE;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.review-subtitle {
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: 0.08em;
+  color: #A8A29E;
+  margin-top: 3px;
+}
+
+.review-papers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 1.6vw, 22px);
+  width: 100%;
+  max-width: 1220px;
+  flex: 1;
+  max-height: calc(100% - 130px);
+  align-items: stretch;
+  perspective: 1200px;
+}
+
+.review-sheet {
+  position: relative;
+  background: linear-gradient(175deg, #FAF7EE 0%, #F5EFE0 55%, #EDE4D0 100%);
+  border: 1px solid rgba(168, 150, 120, 0.45);
+  border-radius: 3px;
+  box-shadow: 
+    0 14px 28px rgba(0, 0, 0, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 0 25px rgba(180, 150, 100, 0.08);
+  padding: clamp(12px, 1.6vw, 18px) clamp(10px, 1.4vw, 16px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Courier Prime', monospace;
+  color: #1C1917;
+  cursor: default;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), z-index 0.28s ease;
+  overflow: hidden;
+}
+
+/* Natural authentic desk fanning angles */
+.review-sheet.sheet-1 {
+  transform: rotate(-1.8deg) translateY(4px);
+}
+.review-sheet.sheet-2 {
+  transform: rotate(0.8deg) translateY(-2px);
+}
+.review-sheet.sheet-3 {
+  transform: rotate(-0.9deg) translateY(3px);
+}
+.review-sheet.sheet-4 {
+  transform: rotate(1.6deg) translateY(-4px);
+}
+
+.review-sheet:hover {
+  transform: rotate(0deg) translateY(-8px) scale(1.035);
+  box-shadow: 
+    0 22px 42px rgba(0, 0, 0, 0.8),
+    0 6px 14px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(180, 150, 100, 0.12);
+  z-index: 10;
+}
+
+.review-sheet-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.sheet-head {
+  border-bottom: 1px dashed rgba(68, 64, 60, 0.45);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.sheet-head-meta {
+  font-size: clamp(8px, 0.8vw, 9.5px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #78716C;
+  text-transform: uppercase;
+}
+
+.sheet-head-title {
+  font-size: clamp(10.5px, 1.05vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #0F172A;
+  margin-top: 2px;
+}
+
+.sheet-body-options {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(5px, 0.8vh, 8px);
+  flex: 1;
+}
+
+.sheet-opt-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  font-size: clamp(8.8px, 0.88vw, 10.8px);
+  line-height: 1.3;
+  color: #44403C;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+.sheet-opt-row.muted-unselected {
+  opacity: 0.65;
+}
+
+.sheet-opt-row.active-chosen {
+  background: rgba(180, 83, 9, 0.08);
+  border-left: 2px solid #D97706;
+  color: #0F172A;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.sheet-opt-header-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sheet-opt-box {
+  font-weight: 700;
+  color: #78716C;
+  flex-shrink: 0;
+}
+
+.sheet-opt-row.active-chosen .sheet-opt-box {
+  color: #D97706;
+}
+
+.sheet-opt-text {
+  flex: 1;
+}
+
+.sheet-opt-val {
+  font-size: clamp(8px, 0.78vw, 9.5px);
+  color: #78716C;
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.sheet-opt-row.active-chosen .sheet-opt-val {
+  color: #B45309;
+}
+
+.sheet-opt-brief {
+  font-size: clamp(7.5px, 0.75vw, 8.8px);
+  color: #78350F;
+  background: rgba(245, 158, 11, 0.09);
+  padding: 3px 5px;
+  border-radius: 2px;
+  margin-top: 2px;
+  margin-left: 18px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.sheet-card-action {
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.sheet-change-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(28, 25, 23, 0.04);
+  border: 1px dashed rgba(68, 64, 60, 0.45);
+  color: #44403C;
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(8px, 0.8vw, 9.5px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sheet-change-btn:hover {
+  background: rgba(180, 83, 9, 0.12);
+  border-color: #D97706;
+  color: #92400E;
+}
+
+.sheet-change-btn:active {
+  transform: translateY(1px);
+}
+
+.sheet-field-row {
+  margin-bottom: clamp(6px, 1vh, 9px);
+  font-size: clamp(9px, 0.9vw, 11px);
+  line-height: 1.35;
+}
+
+.sheet-field-label {
+  font-size: clamp(7.5px, 0.75vw, 9px);
+  font-weight: 700;
+  color: #78716C;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sheet-field-val {
+  color: #0F172A;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.sheet-field-message {
+  font-size: clamp(8.5px, 0.82vw, 10px);
+  color: #334155;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 4px 6px;
+  border-left: 2px solid #78716C;
+  margin-top: 2px;
+  max-height: 70px;
+  overflow-y: auto;
+  line-height: 1.3;
+}
+
+.sheet-stamp-box {
+  border: 1.5px solid #991B1B;
+  color: #991B1B;
+  font-weight: 700;
+  font-size: clamp(8px, 0.8vw, 9.5px);
+  letter-spacing: 0.1em;
+  text-align: center;
+  padding: 3px 6px;
+  border-radius: 2px;
+  margin-top: 6px;
+  transform: rotate(-1.5deg);
+  text-transform: uppercase;
+}
+
+.sheet-footer {
+  border-top: 1px dashed rgba(68, 64, 60, 0.35);
+  padding-top: 5px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(7px, 0.7vw, 8.5px);
+  color: #78716C;
+  letter-spacing: 0.06em;
+}
+
+.review-spread-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-top: clamp(8px, 1.4vh, 16px);
+}
+
+.review-action-btn {
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  font-size: clamp(11px, 1.1vw, 13px);
+  letter-spacing: 0.08em;
+  padding: 10px 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  outline: none;
+}
+
+.review-action-btn.secondary {
+  background: rgba(30, 26, 22, 0.85);
+  border: 1px solid #78716C;
+  color: #D6D3D1;
+}
+
+.review-action-btn.secondary:hover {
+  background: rgba(44, 38, 32, 0.95);
+  color: #FFFFFF;
+  border-color: #A8A29E;
+}
+
+.review-action-btn.primary {
+  background: linear-gradient(180deg, #A8242A 0%, #83181D 100%);
+  border: 1.5px solid #DC2626;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.review-action-btn.primary:hover {
+  background: linear-gradient(180deg, #B91C1C 0%, #991B1B 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(185, 28, 28, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.review-action-btn.primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.4);
+}
+
+/* Rubber Stamp Overlay on submission */
+.transmitted-stamp-overlay {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(0.6);
+  border: 3px solid #DC2626;
+  color: #DC2626;
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-weight: 700;
+  font-size: clamp(14px, 1.8vw, 20px);
+  letter-spacing: 0.18em;
+  padding: 6px 14px;
+  border-radius: 4px;
+  background: rgba(220, 38, 38, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.transmitted-stamp-overlay.stamped {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(1);
+}
+
+@media (max-width: 900px) {
+  .review-papers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    overflow-y: auto;
+  }
+}
