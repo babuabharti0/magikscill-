@@ -2,9 +2,13 @@
    VINTAGE WINE-RED ROYAL MECHANICAL TELETYPE - 3D REALISTIC PAPER PHYSICS
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Playpen+Sans:wght@100..800&display=swap');
 
 :root {
+  --font-display: 'Fraunces', 'Cormorant Garamond', serif;
+  --font-editorial: 'Cormorant Garamond', 'Fraunces', serif;
+  --font-body: 'Playpen Sans', 'Comic Relief', sans-serif;
+  --font-comic: 'Comic Relief', 'Playpen Sans', cursive;
   --bg-darkroom: #090a0d;
   --bg-desk: #12141a;
   --paper-cream: #f6f1e7;
@@ -29,7 +33,7 @@ html, body {
   height: 100%;
   background: #090a0d;
   overflow: hidden;
-  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', 'Cormorant Garamond', sans-serif;
   color: #d1d5db;
   display: flex;
   align-items: center;
@@ -44,7 +48,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #090a0d url("public/assets/desk.png") no-repeat center bottom / cover;
+  background: #090a0d url("public/assets/vintage_dark_academia_desk.jpg") no-repeat center bottom / cover;
   overflow: hidden;
 }
 
@@ -81,6 +85,192 @@ html, body {
   z-index: 1;
 }
 
+/* ==========================================================================
+   DESK LAMP LIGHTING & INTERACTIVE PULL-CHAIN SWITCH
+   ========================================================================== */
+
+/* 1. Volumetric Beam angled from the right gooseneck lamp */
+.lamp-light-beam {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: radial-gradient(ellipse 1100px 850px at 78% 28%, rgba(255, 235, 180, 0.28) 0%, rgba(255, 205, 120, 0.15) 38%, rgba(220, 150, 50, 0.04) 65%, transparent 85%);
+  mix-blend-mode: screen;
+}
+
+/* 2. Direct Spotlight Pooling over Typewriter Paper */
+.lamp-paper-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: radial-gradient(ellipse 650px 480px at 50% 46%, rgba(255, 245, 210, 0.36) 0%, rgba(255, 220, 140, 0.22) 42%, rgba(255, 180, 70, 0.07) 72%, transparent 95%);
+  mix-blend-mode: color-dodge;
+}
+
+/* 3. Incandescent Tungsten Bulb Glow */
+.lamp-bulb-glow {
+  position: absolute;
+  right: clamp(65px, 11vw, 175px);
+  top: clamp(16%, 22vh, 30%);
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transform: translate(25%, -20%);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: radial-gradient(circle, rgba(255, 255, 245, 0.98) 0%, rgba(255, 225, 130, 0.78) 28%, rgba(255, 170, 50, 0.4) 55%, transparent 75%);
+  box-shadow: 0 0 75px 30px rgba(255, 200, 90, 0.55);
+  mix-blend-mode: screen;
+}
+
+/* 4. Active Lamp Illumination State */
+.viewport-wrapper.lamp-on .lamp-light-beam,
+.viewport-wrapper.lamp-on .lamp-paper-spotlight,
+.viewport-wrapper.lamp-on .lamp-bulb-glow {
+  opacity: 1;
+}
+
+.viewport-wrapper.lamp-on .lamp-bulb-glow {
+  animation: filament-subtle-glow 7s ease-in-out infinite alternate;
+}
+
+@keyframes filament-subtle-glow {
+  0% { transform: translate(25%, -20%) scale(0.98); opacity: 0.95; }
+  100% { transform: translate(25%, -20%) scale(1.02); opacity: 1; }
+}
+
+/* Radiance on Typewriter Paper when Lamp is ON */
+.viewport-wrapper.lamp-on .typewriter-paper {
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.65), 0 0 45px rgba(255, 220, 130, 0.32), inset 0 0 32px rgba(255, 230, 160, 0.2) !important;
+  filter: brightness(1.08) contrast(1.04) !important;
+}
+
+.viewport-wrapper.lamp-on .bg-desk {
+  filter: brightness(1.04) contrast(1.06) saturate(1.1) !important;
+}
+
+.viewport-wrapper.lamp-on .video-overlay-tint {
+  background: radial-gradient(ellipse at 50% 32%, rgba(255, 235, 195, 0.08) 0%, rgba(16, 12, 8, 0.12) 50%, rgba(6, 5, 4, 0.52) 100%) !important;
+}
+
+.viewport-wrapper.lamp-on .desk-surface {
+  background: radial-gradient(ellipse at 50% 26%, rgba(255, 215, 140, 0.18) 0%, rgba(210, 160, 90, 0.06) 48%, transparent 78%) !important;
+}
+
+/* Dimmed Ambient when Lamp is OFF */
+.viewport-wrapper:not(.lamp-on) .video-overlay-tint {
+  background: radial-gradient(ellipse at 50% 32%, rgba(20, 16, 12, 0.28) 0%, rgba(10, 8, 6, 0.52) 50%, rgba(4, 3, 2, 0.82) 100%);
+}
+
+.viewport-wrapper:not(.lamp-on) .bg-desk {
+  filter: brightness(0.85) contrast(1.02) saturate(0.92);
+}
+
+.viewport-wrapper:not(.lamp-on) .typewriter-paper {
+  filter: brightness(0.96) contrast(1.02);
+}
+
+/* 5. Hanging Pull-Chain Switch Assembly */
+.lamp-pull-switch {
+  position: absolute;
+  right: clamp(65px, 12vw, 185px);
+  top: clamp(23%, 29vh, 37%);
+  z-index: 45;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  touch-action: none;
+  outline: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7));
+}
+
+.lamp-pull-switch:active {
+  cursor: grabbing;
+}
+
+.pull-chain-mount {
+  width: 14px;
+  height: 6px;
+  background: linear-gradient(to right, #6e4e10, #e2ba55, #6e4e10);
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.pull-chain-cord {
+  transform-origin: top center;
+  transition: transform 0.08s ease-out;
+  animation: chain-idle 5s ease-in-out infinite;
+}
+
+.lamp-pull-switch:hover .pull-chain-cord {
+  animation: chain-hover 1.2s ease-in-out infinite;
+}
+
+.pull-chain-cord.is-pulling {
+  transform: translateY(30px) scaleY(1.08) !important;
+  transition: transform 0.05s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.pull-chain-cord.is-rebounding {
+  animation: chain-rebound 0.75s cubic-bezier(0.25, 1.4, 0.4, 1) forwards !important;
+}
+
+.pull-chain-label {
+  margin-top: 6px;
+  font-family: 'Playpen Sans', 'Comic Relief', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(226, 186, 85, 0.75);
+  text-transform: uppercase;
+  background: rgba(18, 14, 10, 0.85);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 75, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.lamp-pull-switch:hover .pull-chain-label {
+  color: #ffde8a;
+  border-color: #ffd066;
+  box-shadow: 0 0 10px rgba(255, 208, 102, 0.4);
+  transform: translateY(2px);
+}
+
+/* Pull-chain dynamic physics keyframes */
+@keyframes chain-idle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.8deg); }
+  75% { transform: rotate(-0.8deg); }
+}
+
+@keyframes chain-hover {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1.6deg); }
+  75% { transform: rotate(-1.4deg); }
+}
+
+@keyframes chain-rebound {
+  0% { transform: translateY(30px) scaleY(1.08); }
+  30% { transform: translateY(-7px) scaleY(0.96) rotate(3.5deg); }
+  55% { transform: translateY(4px) scaleY(1.02) rotate(-2deg); }
+  75% { transform: translateY(-2px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
 /* MAIN APP CONTAINER */
 .app-container {
   position: relative;
@@ -91,50 +281,6 @@ html, body {
   z-index: 2;
   display: flex;
   flex-direction: column;
-}
-
-/* Ambient engagement banner */
-.ambient-banner {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 60;
-  background: rgba(22, 17, 12, 0.92);
-  border: 1px solid rgba(212, 175, 75, 0.45);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 184, 51, 0.2);
-  color: #ffc453;
-  font-size: 11px;
-  letter-spacing: 2.2px;
-  text-transform: uppercase;
-  padding: 6px 22px;
-  border-radius: 20px;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  will-change: opacity, transform;
-}
-
-.ambient-banner.fade-out {
-  opacity: 0;
-  transform: translate(-50%, -14px);
-  pointer-events: none;
-}
-
-.pulse-pip {
-  width: 7px;
-  height: 7px;
-  background-color: var(--amber-glow);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--amber-glow);
-  animation: pip-blink 1.4s ease-in-out infinite;
-}
-
-@keyframes pip-blink {
-  0%, 100% { opacity: 0.3; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.15); }
 }
 
 /* Top HUD bar */
@@ -154,7 +300,7 @@ html, body {
   font-size: 10px;
   letter-spacing: 2.2px;
   color: rgba(220, 205, 175, 0.6);
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
@@ -469,7 +615,7 @@ html, body {
   box-shadow: inset 0 0 25px rgba(180, 160, 120, 0.16), 0 8px 24px rgba(0, 0, 0, 0.42);
   border-radius: 1px;
   padding: 16px 18px 28px 18px;
-  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   color: #0F172A;
   z-index: 5;
   overflow: hidden;
@@ -553,7 +699,7 @@ html, body {
   justify-content: space-between;
   height: 100%;
   padding: 4px 6px;
-  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   color: #0F172A;
 }
 
@@ -644,7 +790,7 @@ html, body {
 }
 
 .opt-num {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-weight: 700;
   color: #78350f;
   margin-right: 4px;
@@ -652,7 +798,7 @@ html, body {
 
 .opt-dots {
   color: rgba(15, 23, 42, 0.35);
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: 10px;
   letter-spacing: 1.5px;
   padding: 0 4px;
@@ -768,7 +914,7 @@ html, body {
   width: 100%;
   background: #0F172A;
   color: #FAF7EE;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -939,7 +1085,7 @@ html, body {
 }
 
 .option-check {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-weight: 700;
   font-size: 11.5px;
   color: #78350f;
@@ -1009,7 +1155,7 @@ html, body {
   border: 1px dashed rgba(120, 100, 75, 0.4);
   border-radius: 3px;
   padding: 10px 12px;
-  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', 'Cormorant Garamond', sans-serif;
   font-size: 11.5px;
   line-height: 1.5;
   color: #1a1714;
@@ -1084,7 +1230,7 @@ html, body {
   font-weight: 700;
   letter-spacing: 1px;
   color: #a82329;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
 }
 
 /* Left Spec Panel */
@@ -1233,7 +1379,7 @@ html, body {
 .dossier-metric-val {
   font-weight: 700;
   color: #1a1714;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
 }
 
 /* Client Sign-off Section */
@@ -1258,7 +1404,7 @@ html, body {
   border: 1px solid rgba(120, 100, 75, 0.35);
   border-radius: 3px;
   padding: 6px 10px;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: 10.5px;
   color: #1a1714;
   outline: none;
@@ -1281,7 +1427,7 @@ html, body {
   background: #9b282d;
   border: 1px solid #cf4249;
   color: #ffffff;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -1511,7 +1657,7 @@ html, body {
     0 1px 2px rgba(0, 0, 0, 0.9);
 
   /* Monospace typography matching stamped typewriter slugs */
-  font-family: 'Courier Prime', 'Special Elite', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', 'Cormorant Garamond', sans-serif;
   font-weight: 700;
   font-size: clamp(8.5px, 1vw, 11px);
   color: #1a1714;
@@ -1688,7 +1834,7 @@ html, body {
 }
 
 .spacebar-label {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -1927,10 +2073,11 @@ html, body {
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.full-frame-review.active ~ #ambient-banner,
-.full-frame-review.active + #ambient-banner {
+#app-container:has(.full-frame-review.active) .top-hud {
   display: none !important;
   opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .full-frame-review.active {
@@ -1945,7 +2092,7 @@ html, body {
 }
 
 .review-title {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: clamp(14px, 1.6vw, 18px);
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -1954,7 +2101,7 @@ html, body {
 }
 
 .review-subtitle {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: clamp(9px, 1vw, 11px);
   letter-spacing: 0.08em;
   color: #A8A29E;
@@ -1987,7 +2134,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   color: #1C1917;
   cursor: default;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), z-index 0.28s ease;
@@ -2136,7 +2283,7 @@ html, body {
   background: rgba(28, 25, 23, 0.04);
   border: 1px dashed rgba(68, 64, 60, 0.45);
   color: #44403C;
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-size: clamp(8px, 0.8vw, 9.5px);
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -2223,7 +2370,7 @@ html, body {
 }
 
 .review-action-btn {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Playpen Sans', 'Comic Relief', 'Fraunces', sans-serif;
   font-weight: 700;
   font-size: clamp(11px, 1.1vw, 13px);
   letter-spacing: 0.08em;
@@ -2273,7 +2420,7 @@ html, body {
   transform: translate(-50%, -50%) rotate(-12deg) scale(0.6);
   border: 3px solid #DC2626;
   color: #DC2626;
-  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
   font-weight: 700;
   font-size: clamp(14px, 1.8vw, 20px);
   letter-spacing: 0.18em;
@@ -2288,6 +2435,10 @@ html, body {
 .transmitted-stamp-overlay.stamped {
   opacity: 1;
   transform: translate(-50%, -50%) rotate(-12deg) scale(1);
+}
+
+.ledger-confirmation-notice {
+  font-family: 'Playpen Sans', 'Comic Relief', sans-serif;
 }
 
 @media (max-width: 900px) {
